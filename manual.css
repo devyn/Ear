@@ -1,0 +1,31 @@
+body {
+  background-color: #000;
+  color: #fff;
+  font-family: Droid Sans, Arial, sans-serif;
+  font-size: 12pt;
+  margin: 30px 15%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #f90;
+  font-family: Myriad Pro, Helvetica Neue, Helvetica, Verdana, sans-serif;
+  border-bottom: 5px solid #222;
+}
+
+code {
+  font-family: Monaco;
+  font-size: 10pt;
+  color: #f90;
+  padding: 0 0.1em;
+}
+
+pre code { color: #fff; padding: 0; }
+
+pre {
+  background-color: #222;
+  padding: 3px 10px;
+}
+
+li {
+  margin: 0.2em 0;
+}
