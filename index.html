@@ -1,6 +1,11 @@
-<html><head>
-<link rel="stylesheet" href="manual.css" type="text/css" />
-</head><body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Ear</title>
+<link rel="stylesheet" href="manual.css" type="text/css">
+</head>
+<body>
 <h1>Ear</h1>
 
 <h2>What's this 'Ear'?</h2>
@@ -46,8 +51,6 @@ n (succ A) = succ A
 <li>There is <code>n zero</code>, and it is equivalent to <code>zero</code>.</li>
 <li>There is <code>n (succ A)</code>, and it is equivalent to <code>succ A</code>.</li>
 </ul>
-
-
 <p>You might wonder, "If <code>n zero</code> and <code>n (succ A)</code> are equivalent to their <code>n</code>-less counterparts, then why bother?"
 The reason for this is actually quite simple. The pattern that <code>n _</code> uses is somewhat similar to a typeclass
 in other languages like Haskell. <code>A</code> is a variable that can be anything. But <code>n A</code> is an <code>A</code> part of <code>n _</code>,
@@ -70,19 +73,27 @@ zero     + (succ A) = succ A
 <p>What exactly can we conclude from <code>_ + _</code>?</p>
 
 <ul>
-<li><code>A + B = C</code>
+<li>
+<code>A + B = C</code>
 
 <ul>
-<li><code>A = C</code> if <code>B</code> is <code>zero</code></li>
-<li><code>B = C</code> if <code>A</code> is <code>zero</code></li>
-<li><code>C</code> is <code>zero</code> if <code>A</code> and <code>B</code> are <code>zero</code>.</li>
-<li><code>n A</code>, <code>n B</code>, <code>n C</code></li>
-<li><code>C &gt;= A</code> and <code>C &gt;= B</code></li>
+<li>
+<code>A = C</code> if <code>B</code> is <code>zero</code>
+</li>
+<li>
+<code>B = C</code> if <code>A</code> is <code>zero</code>
+</li>
+<li>
+<code>C</code> is <code>zero</code> if <code>A</code> and <code>B</code> are <code>zero</code>.</li>
+<li>
+<code>n A</code>, <code>n B</code>, <code>n C</code>
+</li>
+<li>
+<code>C &gt;= A</code> and <code>C &gt;= B</code>
+</li>
 </ul>
 </li>
 </ul>
-
-
 <p>That's quite a bit. This really comes in handy for error checking.</p>
 
 <h3>Guards</h3>
@@ -174,11 +185,14 @@ main = 15
 <li>We know that <code>(n A) + (n B) = n C</code> where <code>n _</code> is a class representing numbers.
 
 <ul>
-<li><code>n _</code> for X and I throughout?
+<li>
+<code>n _</code> for X and I throughout?
 
 <ul>
-<li><code>n I == I</code> for all? Yes.</li>
-<li><code>n X == X</code> for all? Yes.</li>
+<li>
+<code>n I == I</code> for all? Yes.</li>
+<li>
+<code>n X == X</code> for all? Yes.</li>
 </ul>
 </li>
 </ul>
@@ -187,10 +201,9 @@ main = 15
 </li>
 </ul>
 </li>
-<li><code>main</code> is valid.</li>
+<li>
+<code>main</code> is valid.</li>
 </ul>
-
-
 <p>If, however, we were to say <code>main = foldr (_+_) 0 [1,2,3,4,5,true]</code>:</p>
 
 <ul>
@@ -203,20 +216,28 @@ main = 15
 <li>We know that <code>(n A) + (n B) = n C</code> where <code>n _</code> is a class representing numbers.
 
 <ul>
-<li><code>n _</code> for X and I throughout?
+<li>
+<code>n _</code> for X and I throughout?
 
 <ul>
-<li><code>n I == I</code> for all? Yes.</li>
-<li><code>n X == X</code> for all?
+<li>
+<code>n I == I</code> for all? Yes.</li>
+<li>
+<code>n X == X</code> for all?
 
 <ul>
-<li><code>n 1 == 1</code>? Yes.</li>
-<li><code>n 2 == 2</code>? Yes.</li>
-<li><code>n 3 == 3</code>? Yes.</li>
-<li><code>n 4 == 4</code>? Yes.</li>
-<li><code>n 5 == 5</code>? Yes.</li>
-<li><code>n true == true</code>? No. <strong>STOP!</strong></li>
-</ul>
+<li>
+<code>n 1 == 1</code>? Yes.</li>
+<li>
+<code>n 2 == 2</code>? Yes.</li>
+<li>
+<code>n 3 == 3</code>? Yes.</li>
+<li>
+<code>n 4 == 4</code>? Yes.</li>
+<li>
+<code>n 5 == 5</code>? Yes.</li>
+<li>
+<code>n true == true</code>? No. <strong>STOP!</strong>
 </li>
 </ul>
 </li>
@@ -226,10 +247,11 @@ main = 15
 </li>
 </ul>
 </li>
-<li><code>main</code> is not valid because <code>n true = true</code> is not declared.</li>
 </ul>
-
-
+</li>
+<li>
+<code>main</code> is not valid because <code>n true = true</code> is not declared.</li>
+</ul>
 <p>Ear will tell you that your program is invalid before you even go to run it.</p>
-
-</body></html>
+</body>
+</html>
