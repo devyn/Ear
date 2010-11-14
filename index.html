@@ -1,0 +1,235 @@
+<html><head>
+<link rel="stylesheet" href="manual.css" type="text/css" />
+</head><body>
+<h1>Ear</h1>
+
+<h2>What's this 'Ear'?</h2>
+
+<p>Ear is a declarative programming language with strong type inference and structural equivalence. It looks like this:</p>
+
+<pre><code>[]        = []
+A : (l B) = A : B
+
+l []      = []
+l (A : B) = A : B
+
+(A : B) + (l C) = A : (B + C)
+
+foldr Fn I []      = I
+foldr Fn I (X : L) = Fn X (foldr Fn I L)
+
+foldl Fn I []      = I
+foldl Fn I (X : L) = foldl Fn (Fn I X) L
+</code></pre>
+
+<h2>Writing an Ear program</h2>
+
+<p>An Ear program is really just a space of rules for equivalence.
+Take this Peano-style unary natural number implementation, for example.</p>
+
+<pre><code>zero       = zero
+succ (n A) = succ A
+n zero     = zero
+n (succ A) = succ A
+</code></pre>
+
+<p>This declares the following:</p>
+
+<ul>
+<li>There is <code>zero</code>, and it is equivalent to itself.</li>
+<li>There is <code>succ (n A)</code>, and it is equivalent to <code>succ A</code>.
+
+<ul>
+<li>This is the same thing as <code>n A == A | succ A = succ A</code> using guards, but more on that later.</li>
+</ul>
+</li>
+<li>There is <code>n zero</code>, and it is equivalent to <code>zero</code>.</li>
+<li>There is <code>n (succ A)</code>, and it is equivalent to <code>succ A</code>.</li>
+</ul>
+
+
+<p>You might wonder, "If <code>n zero</code> and <code>n (succ A)</code> are equivalent to their <code>n</code>-less counterparts, then why bother?"
+The reason for this is actually quite simple. The pattern that <code>n _</code> uses is somewhat similar to a typeclass
+in other languages like Haskell. <code>A</code> is a variable that can be anything. But <code>n A</code> is an <code>A</code> part of <code>n _</code>,
+which means that <code>A</code> itself can now only be a <code>zero</code> or a <code>succ _</code>. This is used in the very definition of <code>succ _</code>:</p>
+
+<pre><code>succ (n A) = succ A
+</code></pre>
+
+<p>See? If we had declared <code>succ A = succ A</code>, <code>succ _</code> could wrap anything! But of course we don't want that.
+We only want it to be able to wrap numbers. So we restrict it to <code>n A</code>, which can only be <code>n zero</code> or <code>n (succ _)</code>.</p>
+
+<p>Let's define the rules for addition of our numbers:</p>
+
+<pre><code>zero     + zero     = zero
+(succ A) + zero     = succ A
+zero     + (succ A) = succ A
+(succ A) + (succ B) = succ (succ (A + B))
+</code></pre>
+
+<p>What exactly can we conclude from <code>_ + _</code>?</p>
+
+<ul>
+<li><code>A + B = C</code>
+
+<ul>
+<li><code>A = C</code> if <code>B</code> is <code>zero</code></li>
+<li><code>B = C</code> if <code>A</code> is <code>zero</code></li>
+<li><code>C</code> is <code>zero</code> if <code>A</code> and <code>B</code> are <code>zero</code>.</li>
+<li><code>n A</code>, <code>n B</code>, <code>n C</code></li>
+<li><code>C &gt;= A</code> and <code>C &gt;= B</code></li>
+</ul>
+</li>
+</ul>
+
+
+<p>That's quite a bit. This really comes in handy for error checking.</p>
+
+<h3>Guards</h3>
+
+<p>Maybe you want to define a class of non-zero numbers.</p>
+
+<pre><code>nonZero (n A) = A
+</code></pre>
+
+<p>Alright, but how do we ensure that <code>nonZero _</code> cannot match <code>nonZero zero</code>? Guards are the answer:</p>
+
+<pre><code>A /= zero | nonZero (n A) = A
+</code></pre>
+
+<p>A guard is a boolean expression that makes specifications for a variable that the variable must fit.
+Here, <code>A /= zero</code> must be <code>true</code>. This ensures that <code>A</code> is not <code>zero</code>, which is what we want.</p>
+
+<p>Really, a guard is anything that satisfies <code>b A</code> where <code>A</code> can be <code>true</code> or <code>false</code>.</p>
+
+<p>On a related note, if you define <code>x (y A)</code> and <code>x A</code>, and both match <code>A</code>,
+whichever is more specific to <code>A</code> (in this case, <code>x (y A)</code>) will be used.</p>
+
+<h3>Anonymous Structures</h3>
+
+<p>Somewhat like anonymous functions, Ear has <em>anonymous structures</em>. An anonymous structure is a set
+of rules of equivalence describing a structure, <code>\</code>. Example:</p>
+
+<pre><code>&gt;&gt; { \ A B = A * B } 2 3
+=&gt; 6
+</code></pre>
+
+<p>The structure must be a prefix structure, where <code>\</code> must only appear once.
+For example, the following is not allowed:</p>
+
+<pre><code>&gt;&gt; { A \ B \ C = A * B * C }
+!! syntax error: anonymous structure must be a linear prefix structure
+</code></pre>
+
+<h3>Partial Structures</h3>
+
+<p>Ear has its own style of partial application with <em>partial structures</em>. Watch them in action:</p>
+
+<pre><code>&gt;&gt; addTwo = 2+_
+&gt;&gt; addTwo 2
+=&gt; 4
+</code></pre>
+
+<p><code>2 + _</code> creates an anonymous structure of <code>{ \ B = 2 + B }</code>.</p>
+
+<h2>Reduction</h2>
+
+<p>An Ear evaluator performs <em>reduction</em>. Its goal is to reduce everything
+until you can no longer reduce anything. Consider this program:</p>
+
+<pre><code>foldr Fn I [] = I
+foldr Fn I (X : L) = Fn X (foldr Fn I L)
+
+main = foldr (_+_) 0 [1,2,3,4,5]
+</code></pre>
+
+<p>Ear reduces:</p>
+
+<pre><code>main = 1 + (foldr (_+_) 0 [2,3,4,5])
+main = 1 + 2 + (foldr (_+_) 0 [3,4,5])
+main = 1 + 2 + 3 + (foldr (_+_) 0 [4,5])
+main = 1 + 2 + 3 + 4 + (foldr (_+_) 0 [5])
+main = 1 + 2 + 3 + 4 + 5 + (foldr (_+_) 0 [])
+main = 1 + 2 + 3 + 4 + 5 + 0
+main = 3 + 3 + 4 + 5 + 0
+main = 6 + 4 + 5 + 0
+main = 10 + 5 + 0
+main = 15 + 0
+main = 15
+</code></pre>
+
+<p>Done.</p>
+
+<h2>Validation</h2>
+
+<p>Ear can validate a program without actually reducing it. Consider the program from the last section.</p>
+
+<ul>
+<li>Is <code>main</code> valid?
+
+<ul>
+<li>Is <code>foldr (_+_) 0 [1,2,3,4,5]</code> valid?
+
+<ul>
+<li>We know that <code>(n A) + (n B) = n C</code> where <code>n _</code> is a class representing numbers.
+
+<ul>
+<li><code>n _</code> for X and I throughout?
+
+<ul>
+<li><code>n I == I</code> for all? Yes.</li>
+<li><code>n X == X</code> for all? Yes.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>main</code> is valid.</li>
+</ul>
+
+
+<p>If, however, we were to say <code>main = foldr (_+_) 0 [1,2,3,4,5,true]</code>:</p>
+
+<ul>
+<li>Is <code>main</code> valid?
+
+<ul>
+<li>Is <code>foldr (_+_) 0 [1,2,3,4,5,true]</code> valid?
+
+<ul>
+<li>We know that <code>(n A) + (n B) = n C</code> where <code>n _</code> is a class representing numbers.
+
+<ul>
+<li><code>n _</code> for X and I throughout?
+
+<ul>
+<li><code>n I == I</code> for all? Yes.</li>
+<li><code>n X == X</code> for all?
+
+<ul>
+<li><code>n 1 == 1</code>? Yes.</li>
+<li><code>n 2 == 2</code>? Yes.</li>
+<li><code>n 3 == 3</code>? Yes.</li>
+<li><code>n 4 == 4</code>? Yes.</li>
+<li><code>n 5 == 5</code>? Yes.</li>
+<li><code>n true == true</code>? No. <strong>STOP!</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>main</code> is not valid because <code>n true = true</code> is not declared.</li>
+</ul>
+
+
+<p>Ear will tell you that your program is invalid before you even go to run it.</p>
+
+</body></html>
