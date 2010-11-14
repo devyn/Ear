@@ -106,6 +106,25 @@ Ear has its own style of partial application with *partial structures*. Watch th
 
 `2 + _` creates an anonymous structure of `{ \ B = 2 + B }`.
 
+### Infinite Patterns
+
+What if you wanted to define the standard list syntax, `[1, 2, 3, ...]`?
+You'd need some way of expressing the `...`, and that's what infinite pattern notation is for.
+
+    L([ _, _ ])~ = L(_ : _ : [])~
+
+This here defines `([_,_])~` which will match `[1] = 1:[]`, `[1,2] = 1:2:[]`, etc.
+
+`A(pre.. _ in.. _ post..)~` is a special pattern template variable which can
+automatically reformat an infinite pattern from the LHS to the RHS of the equation.
+
+#### Infinite Patterns and Partial Application
+
+If you would like to partially apply an infinite pattern, you must do this:
+
+    x = [(_,_)~]
+    x = { \ A(_ _)~ = A([_,_])~ }
+
 ## Reduction
 
 An Ear evaluator performs *reduction*. Its goal is to reduce everything

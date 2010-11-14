@@ -1,0 +1,16 @@
+zero       = zero
+succ (n A) = succ A
+
+n zero     = zero
+n (succ A) = succ A
+
+zero     + zero     = zero
+(succ A) + zero     = succ A
+zero     + (succ A) = succ A
+(succ A) + (succ B) = succ (succ (A + B))
+
+zero     - zero     = zero
+(succ A) - zero     = succ A
+(succ A) - (succ B) = A - B
+
+(succ A) * (n B) = B + (A * B)
