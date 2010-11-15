@@ -21,10 +21,10 @@ l (A : B) = A : B
 (A : B) + (l C) = A : (B + C)
 
 foldr Fn I []      = I
-foldr Fn I (X : L) = Fn X (foldr Fn I L)
+foldr Fn I (X : L) = Fn{ \ X (foldr Fn I L) }
 
 foldl Fn I []      = I
-foldl Fn I (X : L) = foldl Fn (Fn I X) L
+foldl Fn I (X : L) = foldl Fn Fn{ \ I X } L
 </code></pre>
 
 <h2>Writing an Ear program</h2>
@@ -116,32 +116,41 @@ Here, <code>A /= zero</code> must be <code>true</code>. This ensures that <code>
 <p>On a related note, if you define <code>x (y A)</code> and <code>x A</code>, and both match <code>A</code>,
 whichever is more specific to <code>A</code> (in this case, <code>x (y A)</code>) will be used.</p>
 
-<h3>Anonymous Structures</h3>
+<h3>Inline Structures</h3>
 
-<p>Somewhat like anonymous functions, Ear has <em>anonymous structures</em>. An anonymous structure is a set
+<p>Somewhat like anonymous functions, Ear has <em>inline structures</em>. An inline structure is a set
 of rules of equivalence describing a structure, <code>\</code>. Example:</p>
 
-<pre><code>&gt;&gt; { \ A B = A * B } 2 3
+<pre><code>&gt;&gt; { \ A B = A * B }{ \ 2 3 }
 =&gt; 6
 </code></pre>
 
-<p>The structure must be a prefix structure, where <code>\</code> must only appear once.
-For example, the following is not allowed:</p>
+<p>The structure can be anything:</p>
 
-<pre><code>&gt;&gt; { A \ B \ C = A * B * C }
-!! syntax error: anonymous structure must be a linear prefix structure
+<pre><code>&gt;&gt; { A \ B \ C = A * B * C }{ 1 \ 2 \ 3 }
+=&gt; 6
 </code></pre>
 
 <h3>Partial Structures</h3>
 
 <p>Ear has its own style of partial application with <em>partial structures</em>. Watch them in action:</p>
 
-<pre><code>&gt;&gt; addTwo = 2+_
-&gt;&gt; addTwo 2
+<pre><code>&gt;&gt; addTwo = _+2
+&gt;&gt; addTwo{\ 2}
 =&gt; 4
 </code></pre>
 
-<p><code>2 + _</code> creates an anonymous structure of <code>{ \ B = 2 + B }</code>.</p>
+<p><code>2 + _</code> creates an anonymous structure of <code>{ \ B = 2 + B }</code>. Why convert to prefix, you might ask?
+It's simply so that functions like <code>foldr</code> can have a standard to depend on. If <code>_ + 2</code> were to
+equal <code>{ A \ = A + 2 }</code>, then <code>foldr</code> would be difficult to use.</p>
+
+<p>Also, watch this:</p>
+
+<pre><code>&gt;&gt; add    = _+_
+&gt;&gt; addTwo = add{\ _ 2}
+&gt;&gt; addTwo{\ 4}
+=&gt; 6
+</code></pre>
 
 <h3>Infinite Patterns</h3>
 
