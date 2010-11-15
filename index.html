@@ -153,15 +153,25 @@ You'd need some way of expressing the <code>...</code>, and that's what infinite
 
 <p>This here defines <code>([_,_])~</code> which will match <code>[1] = 1:[]</code>, <code>[1,2] = 1:2:[]</code>, etc.</p>
 
-<p><code>A(pre.. _ in.. _ post..)~</code> is a special <em>infinite pattern</em> variable which can automatically
-reformat an infinite pattern from the LHS to the RHS of the equation.</p>
+<p>Another example with an alternating pattern of two infixes:</p>
+
+<pre><code>L([ _ =&gt; _, _ =&gt; _ ])~ = L([[_, _], [_, _]])
+</code></pre>
+
+<p>This is a hashmap/dictionary. It defines <code>([_=&gt;_,_=&gt;_])~</code>.</p>
 
 <h4>Infinite Patterns and Partial Application</h4>
 
 <p>If you would like to partially apply an infinite pattern, you must do this:</p>
 
-<pre><code>x = [(_,_)~]
-x = { \ A(_ _)~ = A([_,_])~ }
+<pre><code>x = ([2,_,_])~
+x = { \ A(_ _)~ = A([2,_,_])~ }
+</code></pre>
+
+<p>Or you can use it normally and do this:</p>
+
+<pre><code>x = [2,3,_,_]
+x = { \ A B = [2,3,A,B] }
 </code></pre>
 
 <h2>Reduction</h2>
