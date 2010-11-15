@@ -115,15 +115,23 @@ You'd need some way of expressing the `...`, and that's what infinite pattern no
 
 This here defines `([_,_])~` which will match `[1] = 1:[]`, `[1,2] = 1:2:[]`, etc.
 
-`A(pre.. _ in.. _ post..)~` is a special pattern template variable which can
-automatically reformat an infinite pattern from the LHS to the RHS of the equation.
+Another example with an alternating pattern of two infixes:
+
+    L([ _ => _, _ => _ ])~ = L([[_, _], [_, _]])
+
+This is a hashmap/dictionary. It defines `([_=>_,_=>_])~`.
 
 #### Infinite Patterns and Partial Application
 
 If you would like to partially apply an infinite pattern, you must do this:
 
-    x = [(_,_)~]
-    x = { \ A(_ _)~ = A([_,_])~ }
+    x = ([2,_,_])~
+    x = { \ A(_ _)~ = A([2,_,_])~ }
+
+Or you can use it normally and do this:
+
+    x = [2,3,_,_]
+    x = { \ A B = [2,3,A,B] }
 
 ## Reduction
 
