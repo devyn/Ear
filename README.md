@@ -4,7 +4,8 @@
 
 Ear is a declarative programming language with strong type inference and structural equivalence. It looks like this:
 
-    # Taken from example/linkedList.ae
+    # Excerpt from example/linkedList.ae
+
     []        = []
     A : (l B) = A : B
 
@@ -15,15 +16,6 @@ Ear is a declarative programming language with strong type inference and structu
 
     foldr Fn I []      = I
     foldr Fn I (X : L) = Fn{ \ X (foldr Fn I L) }
-
-    foldl Fn I []      = I
-    foldl Fn I (X : L) = foldl Fn Fn{ \ I X } L
-
-    # convenience
-
-    product L = foldl (_*_) 1 L
-
-    L([ _, _ ])~ = L(_ : _ : [])~
 
 Click [here](linkedList.ae.html) to see this file as
 [highlighted](http://github.com/devyn/Ear/tree/master/extras/vim/syntax/ear.vim)
