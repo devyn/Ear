@@ -18,8 +18,8 @@ endif
 
 syn match   earNumber   "0x[0-9A-Fa-f]\+\|0[0-7]\+\|0b[0-1]\+\|0z[0-9A-Za-z]\+\|[0-9]\+"
 syn match   earVariable "\(^|\s\)\@=[A-Z][A-Za-z0-9']*"
-syn match   earStruct   "[{}()[\]_~\\|]\|\s\@==\s\@="
-syn match   earOperator "[-`+%&*/@$^,?.;:=><]"
+syn match   earOperator "[-`+%&*/@$^,?.;:>=<]"
+syn match   earStruct   "[{}()[\]_~\\|]\|\(\s\)\@<==\(\s\)\@="
 syn region  earString   start='"' skip='\\"' end='"'
 syn keyword earKeyword  import
 syn match   earComment  "#.*"
@@ -33,8 +33,8 @@ if version >= 508 || !exists("did_ear_syn_inits")
   endif
 
   HiLink earNumber   Number
-  HiLink earVariable Identifier
   HiLink earStruct   Structure
+  HiLink earVariable Identifier
   HiLink earOperator Operator
   HiLink earString   String
   HiLink earKeyword  Statement
