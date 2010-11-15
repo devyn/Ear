@@ -7,10 +7,10 @@ l (A : B) = A : B
 (A : B) + (l C) = A : (B + C)
 
 foldr Fn I []      = I
-foldr Fn I (X : L) = Fn X (foldr Fn I L)
+foldr Fn I (X : L) = Fn{ \ X (foldr Fn I L) }
 
 foldl Fn I []      = I
-foldl Fn I (X : L) = foldl Fn (Fn I X) L
+foldl Fn I (X : L) = foldl Fn Fn{ \ I X } L
 
 # convenience
 

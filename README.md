@@ -13,10 +13,10 @@ Ear is a declarative programming language with strong type inference and structu
     (A : B) + (l C) = A : (B + C)
 
     foldr Fn I []      = I
-    foldr Fn I (X : L) = Fn X (foldr Fn I L)
+    foldr Fn I (X : L) = Fn{ \ X (foldr Fn I L) }
 
     foldl Fn I []      = I
-    foldl Fn I (X : L) = foldl Fn (Fn I X) L
+    foldl Fn I (X : L) = foldl Fn Fn{ \ I X } L
 
 ## Writing an Ear program
 
@@ -82,29 +82,37 @@ Really, a guard is anything that satisfies `b A` where `A` can be `true` or `fal
 On a related note, if you define `x (y A)` and `x A`, and both match `A`,
 whichever is more specific to `A` (in this case, `x (y A)`) will be used.
 
-### Anonymous Structures
+### Inline Structures
 
-Somewhat like anonymous functions, Ear has *anonymous structures*. An anonymous structure is a set
+Somewhat like anonymous functions, Ear has *inline structures*. An inline structure is a set
 of rules of equivalence describing a structure, `\`. Example:
 
-    >> { \ A B = A * B } 2 3
+    >> { \ A B = A * B }{ \ 2 3 }
     => 6
 
-The structure must be a prefix structure, where `\` must only appear once.
-For example, the following is not allowed:
+The structure can be anything:
 
-    >> { A \ B \ C = A * B * C }
-    !! syntax error: anonymous structure must be a linear prefix structure
+    >> { A \ B \ C = A * B * C }{ 1 \ 2 \ 3 }
+    => 6
 
 ### Partial Structures
 
 Ear has its own style of partial application with *partial structures*. Watch them in action:
 
-    >> addTwo = 2+_
-    >> addTwo 2
+    >> addTwo = _+2
+    >> addTwo{\ 2}
     => 4
 
-`2 + _` creates an anonymous structure of `{ \ B = 2 + B }`.
+`2 + _` creates an anonymous structure of `{ \ B = 2 + B }`. Why convert to prefix, you might ask?
+It's simply so that functions like `foldr` can have a standard to depend on. If `_ + 2` were to
+equal `{ A \ = A + 2 }`, then `foldr` would be difficult to use.
+
+Also, watch this:
+
+    >> add    = _+_
+    >> addTwo = add{\ _ 2}
+    >> addTwo{\ 4}
+    => 6
 
 ### Infinite Patterns
 
