@@ -12,7 +12,8 @@
 
 <p>Ear is a declarative programming language with strong type inference and structural equivalence. It looks like this:</p>
 
-<pre><code>[]        = []
+<pre><code># Taken from example/linkedList.ae
+[]        = []
 A : (l B) = A : B
 
 l []      = []
@@ -25,7 +26,17 @@ foldr Fn I (X : L) = Fn{ \ X (foldr Fn I L) }
 
 foldl Fn I []      = I
 foldl Fn I (X : L) = foldl Fn Fn{ \ I X } L
+
+# convenience
+
+product L = foldl (_*_) 1 L
+
+L([ _, _ ])~ = L(_ : _ : [])~
 </code></pre>
+
+<p>Click <a href="linkedList.ae.html">here</a> to see this file as
+<a href="http://github.com/devyn/Ear/tree/master/extras/vim/syntax/ear.vim">highlighted</a>
+by <a href="http://www.vim.org/">Vim</a>.</p>
 
 <h2>Writing an Ear program</h2>
 
@@ -53,8 +64,9 @@ n (succ A) = succ A
 </ul>
 <p>You might wonder, "If <code>n zero</code> and <code>n (succ A)</code> are equivalent to their <code>n</code>-less counterparts, then why bother?"
 The reason for this is actually quite simple. The pattern that <code>n _</code> uses is somewhat similar to a typeclass
-in other languages like Haskell. <code>A</code> is a variable that can be anything. But <code>n A</code> is an <code>A</code> part of <code>n _</code>,
-which means that <code>A</code> itself can now only be a <code>zero</code> or a <code>succ _</code>. This is used in the very definition of <code>succ _</code>:</p>
+in other languages like <a href="http://www.haskell.org/">Haskell</a>. <code>A</code> is a variable that can be anything.
+But <code>n A</code> is an <code>A</code> part of <code>n _</code>, which means that <code>A</code> itself can now only be a <code>zero</code> or a <code>succ _</code>.
+This is used in the very definition of <code>succ _</code>:</p>
 
 <pre><code>succ (n A) = succ A
 </code></pre>
