@@ -4,6 +4,7 @@
 
 Ear is a declarative programming language with strong type inference and structural equivalence. It looks like this:
 
+    # Taken from example/linkedList.ae
     []        = []
     A : (l B) = A : B
 
@@ -17,6 +18,16 @@ Ear is a declarative programming language with strong type inference and structu
 
     foldl Fn I []      = I
     foldl Fn I (X : L) = foldl Fn Fn{ \ I X } L
+
+    # convenience
+
+    product L = foldl (_*_) 1 L
+
+    L([ _, _ ])~ = L(_ : _ : [])~
+
+Click [here](linkedList.ae.html) to see this file as
+[highlighted](http://github.com/devyn/Ear/tree/master/extras/vim/syntax/ear.vim)
+by [Vim](http://www.vim.org/).
 
 ## Writing an Ear program
 
@@ -38,8 +49,9 @@ This declares the following:
 
 You might wonder, "If `n zero` and `n (succ A)` are equivalent to their `n`-less counterparts, then why bother?"
 The reason for this is actually quite simple. The pattern that `n _` uses is somewhat similar to a typeclass
-in other languages like Haskell. `A` is a variable that can be anything. But `n A` is an `A` part of `n _`,
-which means that `A` itself can now only be a `zero` or a `succ _`. This is used in the very definition of `succ _`:
+in other languages like [Haskell](http://www.haskell.org/). `A` is a variable that can be anything.
+But `n A` is an `A` part of `n _`, which means that `A` itself can now only be a `zero` or a `succ _`.
+This is used in the very definition of `succ _`:
 
     succ (n A) = succ A
 
