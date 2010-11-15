@@ -17,8 +17,8 @@ if !exists("main_syntax")
 endif
 
 syn match   earNumber   "0x[0-9A-Fa-f]\+\|0[0-7]\+\|0b[0-1]\+\|0z[0-9A-Za-z]\+\|[0-9]\+"
-syn match   earVariable "[A-Z][A-Za-z0-9']*"
-syn match   earOperator "[-+%&*/@$^,?.;:=><|\\]"
+syn match   earVariable "\(^|\s\)\@=[A-Z][A-Za-z0-9']*"
+syn match   earOperator "[-`+%&*/@$^,?.;:=><|\\]"
 syn match   earStruct   "[{}()[\]_~]"
 syn region  earString   start='"' skip='\\"' end='"'
 syn keyword earKeyword  import
