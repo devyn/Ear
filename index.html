@@ -143,6 +143,27 @@ For example, the following is not allowed:</p>
 
 <p><code>2 + _</code> creates an anonymous structure of <code>{ \ B = 2 + B }</code>.</p>
 
+<h3>Infinite Patterns</h3>
+
+<p>What if you wanted to define the standard list syntax, <code>[1, 2, 3, ...]</code>?
+You'd need some way of expressing the <code>...</code>, and that's what infinite pattern notation is for.</p>
+
+<pre><code>L([ _, _ ])~ = L(_ : _ : [])~
+</code></pre>
+
+<p>This here defines <code>([_,_])~</code> which will match <code>[1] = 1:[]</code>, <code>[1,2] = 1:2:[]</code>, etc.</p>
+
+<p><code>A(pre.. _ in.. _ post..)~</code> is a special <em>infinite pattern</em> variable which can automatically
+reformat an infinite pattern from the LHS to the RHS of the equation.</p>
+
+<h4>Infinite Patterns and Partial Application</h4>
+
+<p>If you would like to partially apply an infinite pattern, you must do this:</p>
+
+<pre><code>x = [(_,_)~]
+x = { \ A(_ _)~ = A([_,_])~ }
+</code></pre>
+
 <h2>Reduction</h2>
 
 <p>An Ear evaluator performs <em>reduction</em>. Its goal is to reduce everything
