@@ -6,6 +6,10 @@ body {
   margin: 30px 15%;
 }
 
+p {
+  text-align: justify;
+}
+
 h1, h2, h3, h4, h5, h6 {
   color: #f90;
   font-family: Myriad Pro, Helvetica Neue, Helvetica, Verdana, sans-serif;
