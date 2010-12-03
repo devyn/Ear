@@ -91,3 +91,12 @@ complexity of syntax. What happens, now, if we do this?
      =  succ (succ (succ (succ zero)))
 
 Whoa. That's more than we need...
+
+## Elimination and Expansion
+
+`E` mode takes an extra step. After eliminating unneeded patterns, it returns
+the result(s) with the highest number of entities. This is, in most cases,
+what you expect in the first place; for example:
+
+    [E] two + two
+     =  succ (succ (succ (succ zero)))
