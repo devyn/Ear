@@ -100,3 +100,7 @@ what you expect in the first place; for example:
 
     [E] two + two
      =  succ (succ (succ (succ zero)))
+
+**Warning!** There probably *are* some cases where `E` mode's output is
+confusing. In these cases, don't cry, revert to `e`. It should give you what
+you're looking for.
