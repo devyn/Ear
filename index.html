@@ -8,294 +8,117 @@
 <body>
 <h1>Ear</h1>
 
-<h2>What's this 'Ear'?</h2>
+<p>Ear is a general-purpose programming language designed on the principles of
+mathematical equivalence. An Ear program is simply a list of equivalent
+patterns.</p>
 
-<p>Ear is a declarative programming language with strong type inference and structural equivalence. It looks like this:</p>
+<p>Here is an example of an Ear number implementation:</p>
 
-<pre><code># Excerpt from example/linkedList.ae
+<pre><code>        num zero     = true
+num A | num (succ A) = true
+        num X        = false
 
-[]        = []
-A : (l B) = A : B
+zero + A     = A + zero
+A + zero     = A
+A + (succ B) = succ (A + B)
 
-l []      = []
-l (A : B) = A : B
-
-(A : B) + (l C) = A : (B + C)
-
-foldr Fn I []      = I
-foldr Fn I (X : L) = Fn{ \ X (foldr Fn I L) }
+zero * A     = A * zero
+A * zero     = zero
+A * (succ B) = A + (A * B)
 </code></pre>
 
-<p>Click <a href="linkedList.ae.html">here</a> to see this file as
-<a href="http://github.com/devyn/Ear/tree/master/extras/vim/syntax/ear.vim">highlighted</a>
-by <a href="http://www.vim.org/">Vim</a>.</p>
+<p>We  will  be dissecting this example  throughout  this article.</p>
 
-<h2>Writing an Ear program</h2>
+<h2>Elimination</h2>
 
-<p>An Ear program is really just a space of rules for equivalence.
-Take this Peano-style unary natural number implementation, for example.</p>
-
-<pre><code>zero       = zero
-succ (n A) = succ A
-n zero     = zero
-n (succ A) = succ A
+<pre><code>$ ear
+Ear Alpha-xxxxxxx
+Ready.
+[e] succ zero
+ =  succ zero
+[e] (succ (succ zero)) * (succ (succ zero))
+ =  succ (succ (succ (succ zero)))
+[e]
 </code></pre>
 
-<p>This declares the following:</p>
+<p>First, Ear loads. It may take a little while to load, as Alpha is expected to
+be slow. You'll see messages like this</p>
 
-<ul>
-<li>There is <code>zero</code>, and it is equivalent to itself.</li>
-<li>There is <code>succ (n A)</code>, and it is equivalent to <code>succ A</code>.
-
-<ul>
-<li>This is the same thing as <code>n A == A | succ A = succ A</code> using guards, but more on that later.</li>
-</ul>
-</li>
-<li>There is <code>n zero</code>, and it is equivalent to <code>zero</code>.</li>
-<li>There is <code>n (succ A)</code>, and it is equivalent to <code>succ A</code>.</li>
-</ul>
-<p>You might wonder, "If <code>n zero</code> and <code>n (succ A)</code> are equivalent to their <code>n</code>-less counterparts, then why bother?"
-The reason for this is actually quite simple. The pattern that <code>n _</code> uses is somewhat similar to a typeclass
-in other languages like <a href="http://www.haskell.org/">Haskell</a>. <code>A</code> is a variable that can be anything.
-But <code>n A</code> is an <code>A</code> part of <code>n _</code>, which means that <code>A</code> itself can now only be a <code>zero</code> or a <code>succ _</code>.
-This is used in the very definition of <code>succ _</code>:</p>
-
-<pre><code>succ (n A) = succ A
+<pre><code>Loading 'essential' environment... (5/24)
 </code></pre>
 
-<p>See? If we had declared <code>succ A = succ A</code>, <code>succ _</code> could wrap anything! But of course we don't want that.
-We only want it to be able to wrap numbers. So we restrict it to <code>n A</code>, which can only be <code>n zero</code> or <code>n (succ _)</code>.</p>
+<p>followed by the <code>Ready.</code> status in the previous example once Ear has finished
+loading.</p>
 
-<p>Let's define the rules for addition of our numbers:</p>
+<p>The <code>[e]</code> prompt shows that we are in <code>elimination</code> mode, that is, Ear will
+attempt to find the equivalent form of what you entered which uses the least
+patterns. for example, <code>(succ zero) * (succ zero)</code> involves 3 patterns
+(<code>_ * _</code>, <code>succ _</code> and <code>zero</code>), where an equivalent form of it, <code>succ zero</code>,
+only involves 2 patterns (<code>succ _</code> and <code>zero</code>).</p>
 
-<pre><code>zero     + zero     = zero
-(succ A) + zero     = succ A
-zero     + (succ A) = succ A
-(succ A) + (succ B) = succ (succ (A + B))
+<p>So, back to the first entry.</p>
+
+<pre><code>[e] succ zero
+ =  succ zero
 </code></pre>
 
-<p>What exactly can we conclude from <code>_ + _</code>?</p>
+<p>The form of <code>succ zero</code> with the least number of patterns is <code>succ zero</code>. That
+is, Ear has found that <code>succ zero</code> already contains the least number of
+patterns possible (at least, thus far).</p>
 
-<ul>
-<li>
-<code>A + B = C</code>
-
-<ul>
-<li>
-<code>A = C</code> if <code>B</code> is <code>zero</code>
-</li>
-<li>
-<code>B = C</code> if <code>A</code> is <code>zero</code>
-</li>
-<li>
-<code>C</code> is <code>zero</code> if <code>A</code> and <code>B</code> are <code>zero</code>.</li>
-<li>
-<code>n A</code>, <code>n B</code>, <code>n C</code>
-</li>
-<li>
-<code>C &gt;= A</code> and <code>C &gt;= B</code>
-</li>
-</ul>
-</li>
-</ul>
-<p>That's quite a bit. This really comes in handy for error checking.</p>
-
-<h3>Guards</h3>
-
-<p>Maybe you want to define a class of non-zero numbers.</p>
-
-<pre><code>nonZero (n A) = A
+<pre><code>[e] (succ (succ zero)) * (succ (succ zero))
+ =  succ (succ (succ (succ zero)))
 </code></pre>
 
-<p>Alright, but how do we ensure that <code>nonZero _</code> cannot match <code>nonZero zero</code>? Guards are the answer:</p>
+<p>This is the same thing discussed above. What we entered contains 7 entities in
+3 patterns, and the result Ear found has 5 entities in 2 patterns. In the
+<code>elimination</code> strategy, it is the number of patterns that count; that's how it
+found the answer.</p>
 
-<pre><code>A /= zero | nonZero (n A) = A
+<p>Moving on, consider the following:</p>
+
+<pre><code>[e] one = succ zero
+[e] succ zero
+ =  one
+[e] one
+ =  one
+[e] one + one
+ =  succ one
+ =  one + one
+ =  succ (succ zero)
 </code></pre>
 
-<p>A guard is a boolean expression that makes specifications for a variable that the variable must fit.
-Here, <code>A /= zero</code> must be <code>true</code>. This ensures that <code>A</code> is not <code>zero</code>, which is what we want.</p>
+<p>Uh-oh. Ear has found that <code>succ one</code> and <code>succ (succ zero)</code> both have the same
+number of entities, and both are equivalent to <code>one + one</code>. Can something have
+three right answers? Yes, if the answers are equivalent.
+<code>one + one = succ one = succ (succ zero)</code>. They're just different ways of
+expressing the same thing.</p>
 
-<p>Really, a guard is anything that satisfies <code>b A</code> where <code>A</code> can be <code>true</code> or <code>false</code>.</p>
+<p>For convenience, Ear has sorted the three answers by number of entities and
+complexity of syntax. What happens, now, if we do this?</p>
 
-<p>On a related note, if you define <code>x (y A)</code> and <code>x A</code>, and both match <code>A</code>,
-whichever is more specific to <code>A</code> (in this case, <code>x (y A)</code>) will be used.</p>
-
-<h3>Inline Structures</h3>
-
-<p>Somewhat like anonymous functions, Ear has <em>inline structures</em>. An inline structure is a set
-of rules of equivalence describing a structure, <code>\</code>. Example:</p>
-
-<pre><code>&gt;&gt; { \ A B = A * B }{ \ 2 3 }
-=&gt; 6
+<pre><code>[e] two = succ one
+[e] two + two
+ =  two + two
+ =  succ (succ two)
+ =  succ (succ (succ one))
+ =  succ (succ (succ (succ zero)))
 </code></pre>
 
-<p>The structure can be anything:</p>
+<p>Whoa. That's more than we need...</p>
 
-<pre><code>&gt;&gt; { A \ B \ C = A * B * C }{ 1 \ 2 \ 3 }
-=&gt; 6
+<h2>Elimination and Expansion</h2>
+
+<p><code>E</code> mode takes an extra step. After eliminating unneeded patterns, it returns
+the result(s) with the highest number of entities. This is, in most cases,
+what you expect in the first place; for example:</p>
+
+<pre><code>[E] two + two
+ =  succ (succ (succ (succ zero)))
 </code></pre>
 
-<h3>Partial Structures</h3>
-
-<p>Ear has its own style of partial application with <em>partial structures</em>. Watch them in action:</p>
-
-<pre><code>&gt;&gt; addTwo = _+2
-&gt;&gt; addTwo{\ 2}
-=&gt; 4
-</code></pre>
-
-<p><code>2 + _</code> creates an anonymous structure of <code>{ \ B = 2 + B }</code>. Why convert to prefix, you might ask?
-It's simply so that functions like <code>foldr</code> can have a standard to depend on. If <code>_ + 2</code> were to
-equal <code>{ A \ = A + 2 }</code>, then <code>foldr</code> would be difficult to use.</p>
-
-<p>Also, watch this:</p>
-
-<pre><code>&gt;&gt; add    = _+_
-&gt;&gt; addTwo = add{\ _ 2}
-&gt;&gt; addTwo{\ 4}
-=&gt; 6
-</code></pre>
-
-<h3>Infinite Patterns</h3>
-
-<p>What if you wanted to define the standard list syntax, <code>[1, 2, 3, ...]</code>?
-You'd need some way of expressing the <code>...</code>, and that's what infinite pattern notation is for.</p>
-
-<pre><code>L([ _, _ ])~ = L(_ : _ : [])~
-</code></pre>
-
-<p>This here defines <code>([_,_])~</code> which will match <code>[1] = 1:[]</code>, <code>[1,2] = 1:2:[]</code>, etc.</p>
-
-<p>Another example with an alternating pattern of two infixes:</p>
-
-<pre><code>L([ _ =&gt; _, _ =&gt; _ ])~ = L([[_, _], [_, _]])
-</code></pre>
-
-<p>This is a hashmap/dictionary. It defines <code>([_=&gt;_,_=&gt;_])~</code>.</p>
-
-<h4>Infinite Patterns and Partial Application</h4>
-
-<p>If you would like to partially apply an infinite pattern, you must do this:</p>
-
-<pre><code>x = ([2,_,_])~
-x = { \ A(_ _)~ = A([2,_,_])~ }
-</code></pre>
-
-<p>Or you can use it normally and do this:</p>
-
-<pre><code>x = [2,3,_,_]
-x = { \ A B = [2,3,A,B] }
-</code></pre>
-
-<h2>Reduction</h2>
-
-<p>An Ear evaluator performs <em>reduction</em>. Its goal is to reduce everything
-until you can no longer reduce anything. Consider this program:</p>
-
-<pre><code>foldr Fn I [] = I
-foldr Fn I (X : L) = Fn X (foldr Fn I L)
-
-main = foldr (_+_) 0 [1,2,3,4,5]
-</code></pre>
-
-<p>Ear reduces:</p>
-
-<pre><code>main = 1 + (foldr (_+_) 0 [2,3,4,5])
-main = 1 + 2 + (foldr (_+_) 0 [3,4,5])
-main = 1 + 2 + 3 + (foldr (_+_) 0 [4,5])
-main = 1 + 2 + 3 + 4 + (foldr (_+_) 0 [5])
-main = 1 + 2 + 3 + 4 + 5 + (foldr (_+_) 0 [])
-main = 1 + 2 + 3 + 4 + 5 + 0
-main = 3 + 3 + 4 + 5 + 0
-main = 6 + 4 + 5 + 0
-main = 10 + 5 + 0
-main = 15 + 0
-main = 15
-</code></pre>
-
-<p>Done.</p>
-
-<h2>Validation</h2>
-
-<p>Ear can validate a program without actually reducing it. Consider the program from the last section.</p>
-
-<ul>
-<li>Is <code>main</code> valid?
-
-<ul>
-<li>Is <code>foldr (_+_) 0 [1,2,3,4,5]</code> valid?
-
-<ul>
-<li>We know that <code>(n A) + (n B) = n C</code> where <code>n _</code> is a class representing numbers.
-
-<ul>
-<li>
-<code>n _</code> for X and I throughout?
-
-<ul>
-<li>
-<code>n I == I</code> for all? Yes.</li>
-<li>
-<code>n X == X</code> for all? Yes.</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<code>main</code> is valid.</li>
-</ul>
-<p>If, however, we were to say <code>main = foldr (_+_) 0 [1,2,3,4,5,true]</code>:</p>
-
-<ul>
-<li>Is <code>main</code> valid?
-
-<ul>
-<li>Is <code>foldr (_+_) 0 [1,2,3,4,5,true]</code> valid?
-
-<ul>
-<li>We know that <code>(n A) + (n B) = n C</code> where <code>n _</code> is a class representing numbers.
-
-<ul>
-<li>
-<code>n _</code> for X and I throughout?
-
-<ul>
-<li>
-<code>n I == I</code> for all? Yes.</li>
-<li>
-<code>n X == X</code> for all?
-
-<ul>
-<li>
-<code>n 1 == 1</code>? Yes.</li>
-<li>
-<code>n 2 == 2</code>? Yes.</li>
-<li>
-<code>n 3 == 3</code>? Yes.</li>
-<li>
-<code>n 4 == 4</code>? Yes.</li>
-<li>
-<code>n 5 == 5</code>? Yes.</li>
-<li>
-<code>n true == true</code>? No. <strong>STOP!</strong>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<code>main</code> is not valid because <code>n true = true</code> is not declared.</li>
-</ul>
-<p>Ear will tell you that your program is invalid before you even go to run it.</p>
+<p><strong>Warning!</strong> There probably <em>are</em> some cases where <code>E</code> mode's output is
+confusing. In these cases, don't cry, revert to <code>e</code>. It should give you what
+you're looking for.</p>
 </body>
 </html>
