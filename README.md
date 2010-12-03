@@ -44,3 +44,20 @@ attempt to find the equivalent form of what you entered which uses the least
 patterns. for example, `(succ zero) * (succ zero)` involves 3 patterns
 (`_ * _`, `succ _` and `zero`), where an equivalent form of it, `succ zero`,
 only involves 2 patterns (`succ _` and `zero`).
+
+So, back to the first entry.
+
+    [e] succ zero
+     =  succ zero
+
+The form of `succ zero` with the least number of patterns is `succ zero`. That
+is, Ear has found that `succ zero` already contains the least number of
+patterns possible (at least, thus far).
+
+    [e] (succ (succ zero)) * (succ (succ zero))
+     =  succ (succ (succ (succ zero)))
+
+This is the same thing discussed above. What we entered contains 7 entities in
+3 patterns, and the result Ear found has 5 entities in 2 patterns. In the
+`elimination` strategy, it is the number of patterns that count; that's how it
+found the answer.
