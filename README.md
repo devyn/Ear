@@ -61,3 +61,33 @@ This is the same thing discussed above. What we entered contains 7 entities in
 3 patterns, and the result Ear found has 5 entities in 2 patterns. In the
 `elimination` strategy, it is the number of patterns that count; that's how it
 found the answer.
+
+Moving on, consider the following:
+
+    [e] one = succ zero
+    [e] succ zero
+     =  one
+    [e] one
+     =  one
+    [e] one + one
+     =  succ one
+     =  one + one
+     =  succ (succ zero)
+
+Uh-oh. Ear has found that `succ one` and `succ (succ zero)` both have the same
+number of entities, and both are equivalent to `one + one`. Can something have
+three right answers? Yes, if the answers are equivalent.
+`one + one = succ one = succ (succ zero)`. They're just different ways of
+expressing the same thing.
+
+For convenience, Ear has sorted the three answers by number of entities and
+complexity of syntax. What happens, now, if we do this?
+
+    [e] two = succ one
+    [e] two + two
+     =  two + two
+     =  succ (succ two)
+     =  succ (succ (succ one))
+     =  succ (succ (succ (succ zero)))
+
+Whoa. That's more than we need...
