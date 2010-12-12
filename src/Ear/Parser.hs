@@ -69,16 +69,15 @@ guards     :: Parser [Pattern]
 equation   :: Parser [Pattern]
 pattern    :: Parser Pattern
 pad        :: Parser a -> Parser a
-whitespace :: Parser [Char]
 lines      :: Parser [Rule]
 
 earDoc = spaces *> lines <* eof
 
 rule = Rule <$> guards <*> equation
 
-guards = many $ try $ pattern <* pad (char '|')
+guards = many $ try $ pad pattern <* char '|'
 
-equation = do ps <- pattern `sepBy` pad (char '=')
+equation = do ps <- pad pattern `sepBy` char '='
               if length ps > 1
                 then return ps
                 else fail "A rule must contain at least two equivalent patterns."
