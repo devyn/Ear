@@ -18,3 +18,15 @@ rule ".html" => [".md"] do |t|
 
   end
 end
+
+namespace "test" do
+  task "interactive" do
+    if ms = ENV['with']
+      ms = ms.split(",")
+      system "ghc",  "-isrc/", "--make", *ms
+      system "ghci", "-isrc/", *ms
+    else
+      raise "Please provide a 'with' environment variable containing a comma-separated list of modules to compile and use."
+    end
+  end
+end
