@@ -70,6 +70,7 @@ equation   :: Parser [Pattern]
 pattern    :: Parser Pattern
 pad        :: Parser a -> Parser a
 lines      :: Parser [Rule]
+comment    :: Parser ()
 
 earDoc = spaces *> lines <* eof
 
@@ -88,3 +89,5 @@ pad p = s *> p <* s
   where s = many $ oneOf " \t"
 
 lines = pad rule `sepEndBy` (newline *> spaces)
+
+comment = char '#' *> many (noneOf "\r\n") *> newline *> pure ()
