@@ -69,10 +69,12 @@ guards     :: Parser [Pattern]
 equation   :: Parser [Pattern]
 pattern    :: Parser Pattern
 pad        :: Parser a -> Parser a
+skip       :: Parser a -> Parser ()
 lines      :: Parser [Rule]
 comment    :: Parser ()
+white      :: Parser ()
 
-earDoc = spaces *> lines <* eof
+earDoc = white *> lines <* eof
 
 rule = Rule <$> guards <*> equation
 
@@ -88,6 +90,10 @@ pattern = (:[]).Variable <$> many (oneOf $ ['A'..'Z'] ++ ['a'..'z'])
 pad p = s *> p <* s
   where s = many $ oneOf " \t"
 
-lines = (pad rule <* optional comment) `sepEndBy` (newline *> spaces)
+skip p = () <$ p
 
-comment = char '#' *> many (noneOf "\r\n") *> pure ()
+lines = (pad rule <* optional comment) `sepEndBy` (newline *> white)
+
+comment = skip $ char '#' *> many (noneOf "\r\n")
+
+white = skip $ many (skip space <|> comment)
