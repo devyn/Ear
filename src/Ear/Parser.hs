@@ -67,25 +67,50 @@ earDoc     :: Parser [Rule]
 rule       :: Parser Rule
 guards     :: Parser [Pattern]
 equation   :: Parser [Pattern]
+part       :: Parser Part
 pattern    :: Parser Pattern
+primN      :: Parser Part
+primS      :: Parser Part
+inner      :: Parser Part
+variable   :: Parser Part
+name       :: Parser Part
 pad        :: Parser a -> Parser a
 skip       :: Parser a -> Parser ()
 lines      :: Parser [Rule]
 comment    :: Parser ()
 white      :: Parser ()
+sepBy'     :: Parser a -> Parser b -> Parser [a] -- uses 'try'
+endBy'     :: Parser a -> Parser b -> Parser [a] -- uses 'try'
+sepEndBy'  :: Parser a -> Parser b -> Parser [a] -- uses 'try'
 
 earDoc = white *> lines <* eof
 
 rule = Rule <$> guards <*> equation
 
-guards = many $ try $ pad pattern <* char '|'
+guards = pad pattern `endBy'` char '|'
 
-equation = do ps <- pad pattern `sepBy` char '='
+equation = do ps <- pad pattern `sepBy'` char '='
               if length ps > 1
                 then return ps
                 else fail "A rule must contain at least two equivalent patterns."
 
-pattern = (:[]).Variable <$> many (oneOf $ ['A'..'Z'] ++ ['a'..'z'])
+part =     try primN
+       <|> try primS 
+       <|> try inner
+       <|> try variable
+       <|> try name
+
+pattern = part `sepBy'` some (oneOf " \t")
+
+primN = empty
+
+primS = empty
+
+inner = Inner <$> between (char '(') (char ')') (pad pattern)
+
+variable = Variable <$> ((:) <$> oneOf ['A'..'Z'] <*> many (noneOf " \t\n()=|"))
+
+name = Name <$> some (noneOf " \t\n()=|")
 
 pad p = s *> p <* s
   where s = many $ oneOf " \t"
@@ -94,6 +119,12 @@ skip p = () <$ p
 
 lines = (pad rule <* optional comment) `sepEndBy` (newline *> white)
 
-comment = skip $ char '#' *> many (noneOf "\r\n")
+comment = skip $ char '#' *> many (noneOf "\n")
 
 white = skip $ many (skip space <|> comment)
+
+p `sepBy'` sep = (:) <$> p <*> many (try $ sep *> p) <|> return []
+
+p `endBy'` sep = many $ try $ p <* sep
+
+p `sepEndBy'` sep = p `sepBy'` sep <* optional (try sep)
