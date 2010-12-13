@@ -9,7 +9,7 @@ module Ear.Parser (
 ) where
 
 import Prelude hiding (lines)
-import Text.Parsec hiding (parse, many, (<|>))
+import Text.Parsec hiding (optional, parse, many, (<|>))
 import qualified Text.Parsec as P
 import Control.Applicative
 
@@ -88,6 +88,6 @@ pattern = (:[]).Variable <$> many (oneOf $ ['A'..'Z'] ++ ['a'..'z'])
 pad p = s *> p <* s
   where s = many $ oneOf " \t"
 
-lines = pad rule `sepEndBy` (newline *> spaces)
+lines = (pad rule <* optional comment) `sepEndBy` (newline *> spaces)
 
-comment = char '#' *> many (noneOf "\r\n") *> newline *> pure ()
+comment = char '#' *> many (noneOf "\r\n") *> pure ()
