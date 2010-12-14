@@ -12,8 +12,9 @@ import Prelude hiding (lines)
 import Text.Parsec hiding (optional, parse, many, (<|>))
 import qualified Text.Parsec as P
 import Control.Applicative
+import Ear.Parser.Util
 
---- Parse Tree ---
+--- exported items ---
 
 -- | An Ear rule, like:
 -- 
@@ -59,7 +60,7 @@ parse :: SourceName               -- ^ The source of that which is
 
 parse  = P.parse earDoc
 
---- internal parser, not exported ---
+--- non-exported items ---
 
 type Parser = Parsec [Char] ()
 
@@ -74,14 +75,9 @@ primS      :: Parser Part
 inner      :: Parser Part
 variable   :: Parser Part
 name       :: Parser Part
-pad        :: Parser a -> Parser a
-skip       :: Parser a -> Parser ()
 lines      :: Parser [Rule]
 comment    :: Parser ()
 white      :: Parser ()
-sepBy'     :: Parser a -> Parser b -> Parser [a] -- uses 'try'
-endBy'     :: Parser a -> Parser b -> Parser [a] -- uses 'try'
-sepEndBy'  :: Parser a -> Parser b -> Parser [a] -- uses 'try'
 
 earDoc = white *> lines <* eof
 
@@ -112,19 +108,8 @@ variable = Variable <$> ((:) <$> oneOf ['A'..'Z'] <*> many (noneOf " \t\n()=|"))
 
 name = Name <$> some (noneOf " \t\n()=|")
 
-pad p = s *> p <* s
-  where s = many $ oneOf " \t"
-
-skip p = () <$ p
-
 lines = (pad rule <* optional comment) `sepEndBy` (newline *> white)
 
 comment = skip $ char '#' *> many (noneOf "\n")
 
 white = skip $ many (skip space <|> comment)
-
-p `sepBy'` sep = (:) <$> p <*> many (try $ sep *> p) <|> return []
-
-p `endBy'` sep = many $ try $ p <* sep
-
-p `sepEndBy'` sep = p `sepBy'` sep <* optional (try sep)
